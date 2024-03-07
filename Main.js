@@ -45,17 +45,16 @@
     // Function to show a hidden chat entry, unused but ready for future implementation
     function showEntry(el) {
         el.style.display = "inline"; // CSS to make the element visible inline
-
     }
 
     // Saves a chat entry to a list for later access
     function saveEntryToList(el) {
         if(sessionList.indexOf(el) >= 0) {
-            alert("Entry already added to list"); // Prevent duplicate entries
+            alert("Entry already added to list, category: " + getCategoryByElement(el)); // Prevent duplicate entries
         } else {
             if (!saveWarnedUser) {
-                alert("Saved entry under category: " + activeCategory + ". To view, click the Notebook, in the bottom left-hand corner. This message only shows once per session.");
                 saveWarnedUser = true; // Ensure the warning is only shown once
+                alert("Saved entry under category: " + activeCategory + ". To view, click the Notebook, in the bottom left-hand corner. This message only shows once per session.");
             }
             categoryLinks.push({
                 main:el,
@@ -93,17 +92,17 @@
         var items = categoryLinks; // Access category links to identify elements to remove
         var removed = false; // Tracks if any link was removed
         var toremove = []; // Temporary array to hold elements that will be removed
-        for (const item of items) {
-            if (item.main === element) {
+        var link = getSessionLink(element);
+        items.forEach(function(item) {
+            if (item.main === link) {
                 toremove.push(item); // Identify and add elements to be removed
             }
-        }
+        });
 
         toremove.forEach(function(el) {
             categoryLinks = filterArrayByValue(categoryLinks, el); // Remove identified elements from categoryLinks
             removed = true; // Update removed flag if elements are removed
         });
-
         return removed; // Return the status of the removal operation
     }
 
@@ -227,6 +226,22 @@
         return linkreturned;
     }
 
+    // Remove the link data from the main chat section to the workbook section
+    function removeSessionLink(element) {
+        var linkreturned = false;
+        sessionLinks.forEach(function(link) {
+            var linkedElement = link.main;
+            if(linkedElement == element) {
+                linkreturned = link;
+                return;
+            }
+        });
+        if(linkreturned != false) {
+            sessionLinks = filterArrayByValue(sessionLinks, linkreturned);
+        }
+        return linkreturned;
+    }
+
     // Turns the chat icons into clickable buttons that restore hidden chat sections
     function buttonizeIcons() {
         // Select chat icons based on specific class names
@@ -306,6 +321,8 @@
                 }
                 sessionList = filterArrayByValue(sessionList, link);
                 // need to remove obj from session links as well
+                removeCategoryLink(element);
+                removeSessionLink(element);
                 element.remove();
                 menu.remove(); // Remove the context menu
             };
