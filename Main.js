@@ -112,8 +112,8 @@
         query.forEach(function(el) {
             //el.style.backgroundColor = "red"; // Highlighting background for visual feedback
             if(sessionIconsAdded.indexOf(el) < 0) { // Check if icons have not been added
-                var saveIcon = createImageIcon("https://icon-library.com/images/save-icon-free/save-icon-free-15.jpg", 1);
-                var hideIcon = createImageIcon("https://cdn4.iconfinder.com/data/icons/social-messaging-ui-blackicon/127000/83-512.png", 3);
+                var saveIcon = createImageIcon("https://cdn1.iconfinder.com/data/icons/medicato/32/cross_round-256.png", 1);
+                var hideIcon = createImageIcon("https://icon-library.com/images/hide-icon/hide-icon-13.jpg", 3);
                 el.appendChild(saveIcon); // Append save icon
                 el.appendChild(hideIcon); // Append hide icon
                 sessionIconsAdded.push(el); // Mark as icons added
@@ -125,7 +125,7 @@
             lastUrl = window.location.href;
             visualIconAdded = true;
             var query2 = document.querySelector(".stretch.mx-2.flex.flex-row.gap-3"); // Find a suitable place to add the icon
-            var viewIcon = createImageIcon("https://icon-library.com/images/notebook-icon-png/notebook-icon-png-18.jpg", 2);
+            var viewIcon = createImageIcon("https://cdn0.iconfinder.com/data/icons/healthcare-science-and-government/64/notepad-paper-notebook-education-diary-256.png", 2);
             query2.parentNode.appendChild(viewIcon); // Add the view icon to the page
         }
     }
