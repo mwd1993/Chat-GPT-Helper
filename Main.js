@@ -4,7 +4,6 @@
 // @version      2024-03-05
 // @description  Enhances interaction with ChatGPT by adding features for saving and hiding chat entries.
 // @author       Marc Davis
-// @match        http://*/*
 // @icon         data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==
 // @grant        none
 // @include      https://chat.openai.com/c/*
