@@ -13,20 +13,20 @@
 (function() {
     'use strict';
 
-    // Initialize variables to track session data and state flags
-    var sessionList = []; // Stores references to chat entries saved by the user
-    var sessionIconsAdded = []; // Tracks chat entries to which icons have already been added
-    var sessionLinks = []; // Links from created section elements to the corresponding sessionList element
-    var categories = [];
-    var categoryLinks = [];
-    var mainLoopStarted = false; // Flag to indicate if the main monitoring loop is active
-    var saveWarnedUser = false; // Ensures the user is warned only once per session about saving entries
-    var visualIconAdded = false; // Flag to indicate if the visual icon for showing saved entries has been added
-    var lastUrl = window.location.href;
-    var activeDropDownToolTip = false;
-    var activeCategory = "General";
-    var activeOverlay = false;
-    console.log("Entire page fully loaded, parsing page in 5 seconds.");
+    var sessionList = []; // Array to store saved chat entries
+    var sessionIconsAdded = []; // Tracks chat entries with added save icons
+    var sessionLinks = []; // Links UI section elements to sessionList elements
+    var categories = []; // Array to categorize saved chat entries
+    var categoryLinks = []; // Links category UI elements to their data
+    var mainLoopStarted = false; // Indicates if main monitoring loop is active
+    var saveWarnedUser = false; // Ensures user is warned once per session about saving
+    var visualIconAdded = false; // Indicates if save entries visual icon is added
+    var lastUrl = window.location.href; // Stores current window location URL
+    var activeDropDownToolTip = false; // Tracks visibility state of dropdown tooltip
+    var activeCategory = "General"; // Currently active/selected category
+    var activeOverlay = false; // Manages presence of an active overlay (e.g., modal window)
+
+    console.log("Entire page fully loaded, parsing page in 5 seconds."); // Log statement
 
     // Start the main loop to deploy icons periodically
     function mainLoop() {
@@ -65,42 +65,46 @@
         }
     }
 
+    // Returns the category associated with a given element from categoryLinks.
     function getCategoryByElement(element) {
-        var items = categoryLinks;
+        var items = categoryLinks; // Holds links between categories and their UI elements
         for (const item of items) {
             if (item.main === element) {
-                return item.category;
+                return item.category; // If element matches, return its associated category
             }
         }
-        return false; // Return null if no matching element is found
+        return false; // If no matching element found, return false
     }
 
+    // Returns an array of elements that belong to a specific category from categoryLinks.
     function getElementsByCategory(category) {
-        var items = categoryLinks;
-        const mains = [];
+        var items = categoryLinks; // Access category links to find elements by category
+        const mains = []; // Array to hold elements belonging to the specified category
         for (const item of items) {
             if (item.category === category) {
-                mains.push(item.main);
+                mains.push(item.main); // Add matching elements to the mains array
             }
         }
-        return mains; // Returns either an empty array or an array of 'main' values
+        return mains; // Returns array of elements, can be empty if no matches found
     }
 
+    // Removes a link associated with a specific element from categoryLinks.
     function removeCategoryLink(element) {
-        var items = categoryLinks;
-        var removed = false
-        var toremove = [];
+        var items = categoryLinks; // Access category links to identify elements to remove
+        var removed = false; // Tracks if any link was removed
+        var toremove = []; // Temporary array to hold elements that will be removed
         for (const item of items) {
             if (item.main === element) {
-                toremove.push(item);
+                toremove.push(item); // Identify and add elements to be removed
             }
         }
 
         toremove.forEach(function(el) {
-            categoryLinks = filterArrayByValue(categoryLinks, el);
+            categoryLinks = filterArrayByValue(categoryLinks, el); // Remove identified elements from categoryLinks
+            removed = true; // Update removed flag if elements are removed
         });
 
-        return removed;
+        return removed; // Return the status of the removal operation
     }
 
     // Deploys save and hide icons next to eligible chat entries
@@ -144,8 +148,8 @@
             });
             image.addEventListener('click', function() {
                 var associatedContext = this.parentNode.parentNode.parentNode;
-                //image.setAttribute("title","Save this section to view later");
                 saveEntryToList(associatedContext); // Save the entry on click
+                closeActiveDropDownToolTip();
             }, false);
         }
         // Type 2: View saved entries icon
@@ -155,6 +159,7 @@
             image.style.backgroundColor = 'rgba(0,0,0,0)';
             image.setAttribute("title","Show & manage your saved sections");
             image.addEventListener('click', function() {
+                closeActiveDropDownToolTip();
                 createOverlayDiv(); // Show saved entries on click
             }, false);
         }
@@ -164,6 +169,7 @@
             image.addEventListener('click', function() {
                 var associatedContext = this.parentNode.parentNode.parentNode;
                 hideEntry(associatedContext); // Hide the entry on click
+                closeActiveDropDownToolTip();
             }, false);
         }
 
@@ -198,15 +204,17 @@
         element.onclick = toggleSize;
     }
 
+    // Returns modified array without value provided
     function filterArrayByValue(arr, value) {
-        var na = [];
+        var na = []; // Initialize a new array to hold filtered elements
         arr.forEach(function(el) {
-            if (el == value) return;
-            na.push(el);
+            if (el == value) return; // Skip the element if it matches the value to be filtered out
+            na.push(el); // Add element to new array if it doesn't match the value
         });
-        return na;
+        return na; // Return the newly created array without the specified value
     }
 
+    // Gets the linked element for the session
     function getSessionLink(element) {
         var linkreturned = false;
         sessionLinks.forEach(function(link) {
@@ -219,23 +227,25 @@
         return linkreturned;
     }
 
+    // Turns the chat icons into clickable buttons that restore hidden chat sections
     function buttonizeIcons() {
+        // Select chat icons based on specific class names
         var icons = document.querySelectorAll(".flex-shrink-0.flex.flex-col.relative.items-end");
 
         icons.forEach(function(el) {
-            if(el.style.cursor != "pointer") {
-                el.style.cursor = "pointer";
-                el.title = "Click to restore the hidden section";
-                addClickListener(el, function() {
-                    var restore = el.parentNode.querySelector(".relative.flex.w-full.flex-col.agent-turn");
-                    restore = restore.querySelector(".flex-col.gap-1");
-                    restore.style.display = "inline";
-
+            if (el.style.cursor != "pointer") { // Make icons clickable if not already
+                el.style.cursor = "pointer"; // Indicate clickable items
+                el.title = "Click to restore the hidden section"; // Tooltip for functionality
+                addClickListener(el, function() { // Add click listener to reveal hidden chat sections
+                    var restore = el.parentNode.querySelector(".relative.flex.w-full.flex-col.agent-turn"); // Find parent chat section
+                    restore = restore.querySelector(".flex-col.gap-1"); // Narrow down to specific hidden part
+                    restore.style.display = "inline"; // Make the hidden part visible
                 });
             }
         });
     }
 
+    // Adds a left-click listener to element provided and runs action (anon function)
     function addClickListener(el, action) {
         // Get the element by its ID
         const element = el;
@@ -252,6 +262,7 @@
         }
     }
 
+    // Basic right click menu popup, used when removing sections in the category manager
     function attachRightClickMenu(element) {
         element.addEventListener('contextmenu', function(e) {
             e.preventDefault(); // Prevent the default context menu
@@ -319,6 +330,7 @@
         });
     }
 
+    // Creates input box menu for when creating a new category
     function createInputBoxMenu(text) {
         // Create elements
         const menu = document.createElement('div');
@@ -371,6 +383,7 @@
                 categories.push(category);
                 console.log("Saved category: " + category);
                 menu.remove();
+                overlayDivRefresh();
             }
         });
         cancelButton.addEventListener('click', () => {
@@ -379,6 +392,7 @@
         });
     }
 
+    // Created the drop down menu for the categories on the main page
     function createCategoriesManager() {
         // Create drop down section "container"
         const container = Object.assign(document.createElement('div'), {
@@ -412,11 +426,11 @@
         // Function to create and style buttons
         const createButton = (text, bgColor) => Object.assign(document.createElement('button'), {
             textContent: text,
-            style: `padding: 5px 15px; color: white; background-color: ${bgColor}; border: none; cursor: pointer;`
+            style: `padding: 5px 15px; color: white; background: ` + bgColor + `; border: none; cursor: pointer;`
         });
 
         // Create + and - buttons
-        const addButton = createButton('+', 'green');
+        const addButton = createButton('+', 'rgba(46, 204, 113, 1)');
 
         // Add an event listener for the '+' button click
         addButton.title = "Create new Category";
@@ -426,7 +440,7 @@
             createInputBoxMenu("Add new category");
         });
 
-        const subtractButton = createButton('-', 'red');
+        const subtractButton = createButton('-', 'rgba(231, 76, 60, 1)');
 
         // Append elements to container and container to body
         subtractButton.title = "Remove active Category";
@@ -441,14 +455,20 @@
         return container;
     }
 
-
+    // Sets the active category to save sections to
     function updateActiveCategory(categoryNow) {
-        // alert("active cat: " + categoryNow);
         activeCategory = categoryNow;
     }
 
+    // Close active drop down tool tip
+    function closeActiveDropDownToolTip() {
+        if(activeDropDownToolTip != false) {
+            activeDropDownToolTip.remove();
+            activeDropDownToolTip = false;
+        }
+    }
 
-
+    // Create the hover category menu
     function createHoverCategoryMenu(targetElement) {
         // Create tooltip container
         if(activeDropDownToolTip != false) {
@@ -518,6 +538,7 @@
         tooltip.addEventListener('mouseleave', hideTooltip);
     }
 
+    // Refresh the overlay div
     function overlayDivRefresh() {
         activeOverlay.remove();
         createOverlayDiv();
@@ -525,29 +546,36 @@
 
     // Creates a semi-transparent overlay to display saved entries
     function createOverlayDiv() {
+        // Create an overlay div and set styles to cover the entire viewport with specific properties
         const overlayDiv = document.createElement('div');
-        activeOverlay = overlayDiv;
-        // Set styles for the overlay to cover the entire viewport
-        overlayDiv.style.position = 'fixed';
-        overlayDiv.style.top = '0';
-        overlayDiv.style.left = '0';
-        overlayDiv.style.width = '100%';
-        overlayDiv.style.height = '100%';
-        overlayDiv.style.backgroundColor = 'rgba(0,0,0,0.5)'; // Semi-transparent background
-        overlayDiv.style.zIndex = '1000'; // Ensure overlay is above other content
-        overlayDiv.style.overflowY = "scroll"; // Enable scrolling
+        activeOverlay = overlayDiv; // Assign created div to activeOverlay.
 
-        // Create and style the close button
+        // Apply styles using Object.assign for conciseness
+        Object.assign(overlayDiv.style, {
+            position: 'fixed', // Fixed position to cover the viewport
+            top: '0', // Start from the top edge
+            left: '0', // Start from the left edge
+            width: '100%', // Span the full width of the viewport
+            height: '100%', // Span the full height of the viewport
+            backgroundColor: 'rgba(0,0,0,0.5)', // Semi-transparent black background
+            zIndex: '1000', // Ensure overlay is above other content
+            overflowY: 'scroll', // Enable vertical scrolling
+        });
+
+        // Create the close button and apply styles and functionality using Object.assign
         const closeButton = document.createElement('button');
-        closeButton.innerText = 'Close';
-        closeButton.style.position = 'absolute';
-        closeButton.style.top = '20px';
-        closeButton.style.right = '20px';
-        closeButton.style.zIndex = '1001'; // Ensure button is above overlay
-        closeButton.style.color = "red";
-        closeButton.style.fontWeight = "bold";
-        closeButton.addEventListener('click', function() {
-            overlayDiv.remove(); // Remove overlay when button is clicked
+        closeButton.innerText = 'Close'; // Set button text
+        Object.assign(closeButton.style, {
+            position: 'absolute',
+            top: '20px',
+            right: '20px',
+            zIndex: '1001', // Ensure button is above the overlay
+            color: 'red',
+            fontWeight: 'bold'
+        });
+        // Attach click event listener to remove the overlay when button is clicked
+        closeButton.addEventListener('click', () => {
+            overlayDiv.remove();
         });
         overlayDiv.appendChild(closeButton); // Add close button to overlay
 
@@ -563,7 +591,6 @@
             }
 
             var paragraph = document.createElement('p');
-            //paragraph.innerText = el.innerText; // Set text to entry's content
             paragraph.innerHTML = el.innerHTML;
             var remove = paragraph.querySelector(".mt-1.flex.justify-start.gap-3");
             remove.remove();
