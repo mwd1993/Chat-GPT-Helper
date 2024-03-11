@@ -18,3 +18,11 @@ The `Chat GPT Helper` script is designed for users of the ChatGPT interface on O
 - **Customization**: The flexibility to create and manage custom categories for saved chat entries allows users to tailor the chat interface to their specific needs and preferences.
 
 In summary, the `Chat GPT Helper` script is a valuable tool for anyone looking to enhance their ChatGPT experience on OpenAI's platform. It simplifies information management, customization, and user interface interaction, making it an essential add-on for users seeking to maximize the utility of ChatGPT sessions.
+
+### Quick Guide to Manually Installing a Script with Tampermonkey
+
+1. **Copy the Script**: Select and copy the entire script you wish to install.
+2. **Open Tampermonkey**: Click on the Tampermonkey extension icon in your browser and navigate to the "Dashboard".
+3. **Create New Script**: In the Dashboard, find and click on the “Create a new script” option.
+4. **Paste the Code**: Clear any existing code in the editor, then paste your copied script.
+5. **Save and Enable**: Hit the save icon or choose "File" > "Save" to save your script. Ensure it’s enabled, and you’re ready to go!
