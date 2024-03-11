@@ -1,6 +1,6 @@
 Requires TamperMonkey
 
-The `Chat GPT Helper` script is designed for users of the ChatGPT interface on OpenAI's website, aimed at enhancing user experience through additional functionalities. It operates as a Tampermonkey user script, which can be easily added to most modern web browsers. Here are the key features and benefits of using this script:
+The `Chat GPT Helper` script, crafted for the ChatGPT interface on OpenAI, enriches your browsing with extra features. Easily installable as a Tampermonkey script, it offers a seamless way to upgrade your chat experience. Here's what it brings to the table:
 
 ### Key Features:
 
