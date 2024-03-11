@@ -17,7 +17,6 @@
     var sessionIconsAdded = []; // Tracks chat entries with added save icons
     var sessionLinks = []; // Links UI section elements to sessionList elements
     var categories = []; // Array to categorize saved chat entries
-    var categoryLinks = []; // Links category UI elements to their data
     var mainLoopStarted = false; // Indicates if main monitoring loop is active
     var saveWarnedUser = false; // Ensures user is warned once per session about saving
     var visualIconAdded = false; // Indicates if save entries visual icon is added
@@ -25,8 +24,53 @@
     var activeDropDownToolTip = false; // Tracks visibility state of dropdown tooltip
     var activeCategory = "General"; // Currently active/selected category
     var activeOverlay = false; // Manages presence of an active overlay (e.g., modal window)
+    var persistantOverlayData = false;
+
 
     console.log("Entire page fully loaded, parsing page in 5 seconds."); // Log statement
+
+
+    class sessionManager {
+        static storageKey = 'sessionList';
+
+        static getUrlIdentifier() {
+            return window.location.pathname;
+        }
+
+        // Method to convert sessionList array into a single HTML string
+        static convertArrayToHtmlString(sessionList) {
+            let htmlString = '';
+
+            // Iterate through each session element
+            for (let element of sessionList) {
+                // Convert element to its outerHTML representation
+                let elementHtml = element instanceof HTMLElement ? element.outerHTML : '';
+                htmlString += elementHtml; // Concatenate into the htmlString
+            }
+
+            return htmlString;
+        }
+
+        // Simplified save method (accepts sessionList array and converts it internally)
+        static saveSessionList() {
+            const urlIdentifier = this.getUrlIdentifier();
+            const storageKey = `${this.storageKey}_${urlIdentifier}`;
+            const sessionListHtml = this.convertArrayToHtmlString(sessionList);
+            console.log("saving session html: " + sessionListHtml);
+            localStorage.setItem(storageKey, sessionListHtml);
+            persistantOverlayData = localStorage.getItem(storageKey);
+        }
+
+        // Load method remains the same, returning the HTML string directly from storage
+        static loadSessionList() {
+            const urlIdentifier = this.getUrlIdentifier();
+            const storageKey = `${this.storageKey}_${urlIdentifier}`;
+            var data = localStorage.getItem(storageKey);
+            persistantOverlayData = data;
+            console.log("loading html: " + data);
+            return data;
+        }
+    }
 
     // Start the main loop to deploy icons periodically
     function mainLoop() {
@@ -56,61 +100,34 @@
                 saveWarnedUser = true; // Ensure the warning is only shown once
                 alert("Saved entry under category: " + activeCategory + ". To view, click the Notebook, in the bottom left-hand corner. This message only shows once per session.");
             }
-            categoryLinks.push({
-                main:el,
-                category:activeCategory
-            });
+            el.setAttribute("data-url", sessionManager.getUrlIdentifier());
             sessionList.push(el); // Add the entry to the list
+            sessionManager.saveSessionList();
+
         }
     }
 
-    // Returns the category associated with a given element from categoryLinks.
+    // Returns the category associated with a given element
     function getCategoryByElement(element) {
-        var items = categoryLinks; // Holds links between categories and their UI elements
-        for (const item of items) {
-            if (item.main === element) {
-                return item.category; // If element matches, return its associated category
-            }
-        }
-        return false; // If no matching element found, return false
+        return element.getAttribute("data-category");
     }
 
-    // Returns an array of elements that belong to a specific category from categoryLinks.
+    // Returns an array of elements that belong to a specific category
     function getElementsByCategory(category) {
-        var items = categoryLinks; // Access category links to find elements by category
+        var items = sessionList; // Access category links to find elements by category
         const mains = []; // Array to hold elements belonging to the specified category
         for (const item of items) {
-            if (item.category === category) {
+            if (item.main.getAttribute("data-category") == category) {//)item.category === category) {
                 mains.push(item.main); // Add matching elements to the mains array
             }
         }
         return mains; // Returns array of elements, can be empty if no matches found
     }
 
-    // Removes a link associated with a specific element from categoryLinks.
-    function removeCategoryLink(element) {
-        var items = categoryLinks; // Access category links to identify elements to remove
-        var removed = false; // Tracks if any link was removed
-        var toremove = []; // Temporary array to hold elements that will be removed
-        var link = getSessionLink(element);
-        items.forEach(function(item) {
-            if (item.main === link) {
-                toremove.push(item); // Identify and add elements to be removed
-            }
-        });
-
-        toremove.forEach(function(el) {
-            categoryLinks = filterArrayByValue(categoryLinks, el); // Remove identified elements from categoryLinks
-            removed = true; // Update removed flag if elements are removed
-        });
-        return removed; // Return the status of the removal operation
-    }
-
     // Deploys save and hide icons next to eligible chat entries
     function deployIcons() {
         var query = document.querySelectorAll(".text-gray-400.flex.self-end"); // Query to find elements to add icons
         query.forEach(function(el) {
-            //el.style.backgroundColor = "red"; // Highlighting background for visual feedback
             if(sessionIconsAdded.indexOf(el) < 0) { // Check if icons have not been added
                 var saveIcon = createImageIcon("https://cdn1.iconfinder.com/data/icons/medicato/32/cross_round-256.png", 1);
                 var hideIcon = createImageIcon("https://icon-library.com/images/hide-icon/hide-icon-13.jpg", 3);
@@ -122,6 +139,34 @@
 
         // Add a visual icon for accessing saved entries if not already added
         if(!visualIconAdded || lastUrl != window.location.href) {
+            if(lastUrl != window.location.href) {
+                sessionList = [];
+                sessionLinks = [];
+                categories = [];
+                activeCategory = "General";
+                // Load session elements
+                const loadedSessionListHTML = sessionManager.loadSessionList();
+                if (loadedSessionListHTML) {
+                    // Add paragraphs for each saved entry
+                    var htmlstr = loadedSessionListHTML
+                    if(htmlstr) {
+                        var temp = document.createElement("div");
+                        temp.innerHTML = htmlstr;
+                        for(var i = 0; i < temp.childNodes.length; i++) {
+                            var el = temp.childNodes[i];
+                            var elcat = el.getAttribute("data-category");
+                            var elurl = el.getAttribute("data-url");
+                            if (elurl != sessionManager.getUrlIdentifier()) {
+                                continue;
+                            }
+                            if(categories.indexOf(elcat) == -1 && elcat != "General") {
+                                categories.push(elcat);
+                            }
+                            saveEntryToList(el)
+                        }
+                    }
+                }
+            }
             lastUrl = window.location.href;
             visualIconAdded = true;
             var query2 = document.querySelector(".stretch.mx-2.flex.flex-row.gap-3"); // Find a suitable place to add the icon
@@ -146,7 +191,11 @@
                 createHoverCategoryMenu(image);
             });
             image.addEventListener('click', function() {
-                var associatedContext = this.parentNode.parentNode.parentNode;
+                var associatedContext = this.parentNode.parentNode.parentNode.firstChild.firstChild;
+                if(sessionList.indexOf(associatedContext) >= 0) {
+                    return;
+                }
+                associatedContext.setAttribute("data-category",activeCategory);
                 saveEntryToList(associatedContext); // Save the entry on click
                 closeActiveDropDownToolTip();
             }, false);
@@ -321,10 +370,10 @@
                 }
                 sessionList = filterArrayByValue(sessionList, link);
                 // need to remove obj from session links as well
-                removeCategoryLink(element);
                 removeSessionLink(element);
                 element.remove();
                 menu.remove(); // Remove the context menu
+                sessionManager.saveSessionList();
             };
             buttonsContainer.appendChild(yesButton);
 
@@ -599,18 +648,17 @@
         var container = createCategoriesManager();
         overlayDiv.append(container);
 
-
-        // Add paragraphs for each saved entry
         sessionList.forEach(function(el) {
             var cat = getCategoryByElement(el);
+            // alert("cat1 attempt " + cat + " -> " + el.innerText);
             if(cat == false || cat != activeCategory) {
-                return;
+                    return;
             }
 
             var paragraph = document.createElement('p');
             paragraph.innerHTML = el.innerHTML;
-            var remove = paragraph.querySelector(".mt-1.flex.justify-start.gap-3");
-            remove.remove();
+            //var remove = paragraph.querySelector(".mt-1.flex.justify-start.gap-3");
+            // remove.remove();
             // Style paragraph to make it distinguishable
             Object.assign(paragraph.style, {
                 backgroundColor: 'rgba(200,200,200,0.8)',
@@ -626,6 +674,7 @@
             toggleElementSize(paragraph);
             overlayDiv.appendChild(paragraph); // Add paragraph to overlay
             var link = {"main":paragraph,"link":el};
+            paragraph.setAttribute("data-category", el.getAttribute("data-category"));
             sessionLinks.push(link);
         });
 
