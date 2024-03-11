@@ -4,18 +4,18 @@ The `Chat GPT Helper` script is designed for users of the ChatGPT interface on O
 
 ### Key Features:
 
-- **Saving Chat Entries**: Allows users to save important chat entries for later reference, organized by customizable categories. This is particularly useful for retaining valuable information or insights generated during a ChatGPT session.
-- **Hiding Chat Entries**: Offers the ability to hide specific chat entries from the main view, helping to declutter the chat interface and focus on relevant discussions.
-- **Customizable Categories**: Users can create and manage categories for saved chat entries, enabling efficient organization and retrieval of saved content.
-- **Visual Indicators**: Integrates visual icons next to chat entries for saving, hiding, or categorizing, making the interface intuitive and user-friendly.
-- **Overlay Display**: Implements a semi-transparent overlay for managing saved entries and categories, providing a centralized location for all saved content without leaving the chat interface.
+- **Save Chat Entries**: Save vital chat entries in customizable categories for future reference.
+- **Hide Chat Entries**: Hide non-essential chat entries to streamline the chat interface.
+- **Custom Categories**: Organize saved chats with user-defined categories for easy access.
+- **Visual Indicators**: Easy-to-use icons for saving, hiding, and categorizing chat entries.
+- **Overlay Display**: A semi-transparent overlay centralizes saved entries for quick navigation.
 
 ### Why Use Chat GPT Helper?
 
-- **Enhanced Productivity**: By allowing users to save and categorize important chat entries, the script makes it easier to revisit critical information, enhancing productivity and efficiency.
-- **Improved Chat Experience**: The ability to hide less relevant chat entries helps users maintain focus on important conversations, improving the overall chat experience.
-- **Ease of Use**: With straightforward visual indicators and an intuitive overlay for managing saved entries, the script is designed for ease of use, requiring no complex setup or configuration.
-- **Customization**: The flexibility to create and manage custom categories for saved chat entries allows users to tailor the chat interface to their specific needs and preferences.
+- **Boosts Productivity**: Quickly revisit important chats, improving efficiency.
+- **Enhances Chat**: Focus on essential conversations by hiding distractions.
+- **User-Friendly**: Intuitive icons and overlay make management straightforward.
+- **Fully Customizable**: Tailor your chat interface to fit personal or professional needs.
 
 In summary, the `Chat GPT Helper` script is a valuable tool for anyone looking to enhance their ChatGPT experience on OpenAI's platform. It simplifies information management, customization, and user interface interaction, making it an essential add-on for users seeking to maximize the utility of ChatGPT sessions.
 
